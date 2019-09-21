@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <wup/wup.hpp>
 #include <QMainWindow>
 #include <QShortcut>
 
@@ -13,12 +14,12 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(wup::Params & params, QWidget *parent = nullptr);
     ~MainWindow();
 
 private:
 
-    void addButton(const char * label, const char * iconFilepath, const char * shortcut, const int row, const int col);
+    void addButton(const QString label, const char * iconFilepath, const char * shortcut, const int row, const int col);
 
 private slots:
     void on_actiona_triggered();

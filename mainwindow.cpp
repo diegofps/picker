@@ -1,28 +1,38 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <wup/wup.hpp>
 #include <QToolButton>
 #include <QShortcut>
 #include <QBitmap>
+#include <QStyle>
 
 using namespace wup;
 
-
-
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(Params & params, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    QMainWindow::showFullScreen();
 
-    auto s = new QShortcut(QKeySequence(tr("Ctrl+O", "File|Open")), this);
-
-    connect(s, &QShortcut::activated, this, &MainWindow::on_shortcut);
-    connect(s, &QShortcut::activated, []()
+    if (params.has("fullscreen"))
     {
-        print("rocking");
+        setWindowFlags(Qt::Widget | Qt::FramelessWindowHint);
+        setParent(0); // Create TopLevel-Widget
+        setAttribute(Qt::WA_NoSystemBackground, true);
+        setAttribute(Qt::WA_TranslucentBackground, true);
+    //    setAttribute(Qt::WA_PaintOnScreen);
+        QMainWindow::showFullScreen();
+    }
+    else
+    {
+        // Set attrib to prevent tiling
+    }
+
+    auto s = new QShortcut(QKeySequence("Escape"), this);
+
+    connect(s, &QShortcut::activated, [this]()
+    {
+        this->close();
     });
 
     auto iconFilepath = "/usr/share/virt-manager/icons/hicolor/48x48/actions/vm_import_wizard.png";
@@ -40,7 +50,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::addButton(const char * const label,
+void MainWindow::addButton(const QString label,
                            const char * const iconFilepath,
                            const char * const shortcut,
                            const int row,
@@ -53,7 +63,22 @@ void MainWindow::addButton(const char * const label,
     b->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     b->setIconSize(QSize(64,64));
     b->setIcon(*icon);
-    b->setText(label);
+    b->setText(label + "\n(" + shortcut + ")");
+
+    b->setStyleSheet(
+                "QToolButton {"
+                    "border: 0px;"
+                    "border-radius: 6px;"
+                    "background-color: #aa000000;"
+                    "color: #fff;"
+                    "padding-top: 7px;"
+                    "padding-bottom: 6px;"
+                    "padding-right: 20px;"
+                    "padding-left: 20px;"
+                "}"
+                "QToolButton:hover {"
+                    "background-color: #bb000000;"
+                "}");
 
     ui->gridLayout->addWidget(b, row, col);
 
