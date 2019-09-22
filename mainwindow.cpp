@@ -49,6 +49,12 @@ void MainWindow::configureWindow(Params &params)
         setAttribute(Qt::WA_TranslucentBackground, true);
     //    setAttribute(Qt::WA_PaintOnScreen);
         QMainWindow::showFullScreen();
+
+        if (params.len("fullscreen"))
+        {
+            auto color = params.getString("fullscreen");
+            this->setStyleSheet(QString("background-color: #") + color);
+        }
     }
     else
     {
