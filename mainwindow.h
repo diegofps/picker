@@ -13,15 +13,33 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+    struct Action
+    {
+        QString name;
+        QString iconFilepath;
+        QString shortcut;
+        QString cmd;
+    };
+
 public:
+
     MainWindow(wup::Params & params, QWidget *parent = nullptr);
     ~MainWindow();
 
 private:
 
-    void addButton(const QString label, const char * iconFilepath, const char * shortcut, const int row, const int col);
+    void configureWindow(wup::Params & params);
+
+    void configureCloseOnEscape();
+
+    void configureActions(wup::Params & params);
+
+    void loadActions(const QString actionsFilepath, QList<Action*> & actions);
+
+    void addButton(const Action * a, const int row, const int col);
 
 private slots:
+
     void on_actiona_triggered();
 
     void on_actionb_triggered();
