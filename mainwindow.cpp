@@ -17,6 +17,7 @@ MainWindow::MainWindow(Params & params, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+    iconSize = params.getInt("iconSize", 64);
     ui->setupUi(this);
 
     configureWindow(params);
@@ -67,6 +68,13 @@ void MainWindow::configureCloseOnEscape()
     });
 }
 
+void MainWindow::changeEvent(QEvent * event)
+{
+    QWidget::changeEvent(event);
+    if (event->type() == QEvent::ActivationChange && !this->isActiveWindow())
+        close();
+}
+
 void MainWindow::configureActions(Params &params)
 {
     QList<Action*> actions;
@@ -94,6 +102,7 @@ void MainWindow::configureActions(Params &params)
 
 void MainWindow::loadActions(const QString actionsFilepath, QList<MainWindow::Action *> &actions)
 {
+    QString homeDir = QDir::homePath();
     QFileInfo info(actionsFilepath);
     QFile file(actionsFilepath);
     QSet<QString> shortcuts;
@@ -114,10 +123,11 @@ void MainWindow::loadActions(const QString actionsFilepath, QList<MainWindow::Ac
 
         auto a = new Action();
 
+
         a->name = cells[0];
-        a->iconFilepath = cells[1];
+        a->iconFilepath = QString(cells[1]).replace("~", homeDir);
         a->shortcut = cells[2];
-        a->cmd = cells[3];
+        a->cmd = QString(cells[3]).replace("~", homeDir);
 
         if (shortcuts.contains(a->shortcut))
             error("Shortcut mapped twice:", a->shortcut);
@@ -132,12 +142,34 @@ void MainWindow::addButton(const Action * a,
                            const int row,
                            const int col)
 {
+    // Get the icon
+    QIcon * icon;
+
+    if (a->iconFilepath.endsWith("svg"))
+    {
+        icon = new QIcon(a->iconFilepath);
+    }
+    else
+    {
+        QPixmap pixmap(a->iconFilepath);
+        if (pixmap.width() != iconSize)
+        {
+            QPixmap scaled = pixmap.scaled( QSize(iconSize, iconSize), Qt::KeepAspectRatio, Qt::SmoothTransformation );
+            icon = new QIcon(scaled);
+        }
+        else
+        {
+            icon = new QIcon(pixmap);
+        }
+    }
+
+
+
     // Configure the button
-    auto icon = new QIcon(a->iconFilepath);
     auto b = new QToolButton();
 
     b->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    b->setIconSize(QSize(64,64));
+    b->setIconSize(QSize(iconSize,iconSize));
     b->setIcon(*icon);
     b->setText(a->name + "\n(" + a->shortcut + ")");
 
@@ -159,7 +191,8 @@ void MainWindow::addButton(const Action * a,
     // Callback to execute this action
     auto callback = [a, this]()
     {
-        QProcess::execute(a->cmd);
+//        QProcess::execute(a->cmd);
+        QProcess::startDetached(a->cmd);
         close();
     };
 

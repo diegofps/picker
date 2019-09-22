@@ -38,6 +38,8 @@ private:
 
     void addButton(const Action * a, const int row, const int col);
 
+    virtual void changeEvent(QEvent *event);
+
 private slots:
 
     void on_actiona_triggered();
@@ -47,6 +49,10 @@ private slots:
     void on_shortcut();
 
 private:
+
     Ui::MainWindow *ui;
+
+    int iconSize;
+
 };
 #endif // MAINWINDOW_H
