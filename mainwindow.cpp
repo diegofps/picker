@@ -198,6 +198,8 @@ void MainWindow::addButton(const Action * a,
     auto callback = [a, this]()
     {
 //        QProcess::execute(a->cmd);
+
+        QDir::setCurrent(QDir::homePath());
         QProcess::startDetached(a->cmd);
         close();
     };
